@@ -2,11 +2,12 @@ import { useState } from "react";
 import abi from "./abi.json";
 import { ethers } from "ethers";
 
-const contractAddress = "0x1f3a0da67bcaaBa742e1b84F5c38Ab80709eDD78";
+const contractAddress = "0x09eeAa5da8F69E313B1FF568F0d6C2BA35d4e533";
 
 function App() {
   const [text, setText] = useState("");
   const [message, setMessage] = useState("");
+
 
   async function requestAccount() {
     if (window.ethereum) {
@@ -29,6 +30,14 @@ function App() {
         const provider = new ethers.BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
         const contract = new ethers.Contract(contractAddress, abi, signer);
+        
+            try {
+              await contract.setMessage.estimateGas(text);
+            } catch (err) {
+              console.error("Gas estimation failed. Likely a contract or input issue.", err);
+              alert("Transaction would fail. Check your input, contract address, or network.");
+              return;
+            }
 
 
         const tx = await contract.setMessage(text); 
@@ -68,7 +77,7 @@ function App() {
         value={text}
         onChange={(e) => setText(e.target.value)}
       />
-      <button onClick={() => handleSet(text)}>Set Message</button>
+      <button onClick={handleSet}>Set Message</button>
     </div>
 
     <div style={{ padding: "2rem" }}>
